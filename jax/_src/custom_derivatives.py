@@ -368,7 +368,7 @@ xla.initial_style_translations[custom_jvp_call_jaxpr_p] = \
 def _custom_jvp_call_jaxpr_transpose(cts, *args, fun_jaxpr, jvp_jaxpr_thunk,
                                      num_consts):
   del jvp_jaxpr_thunk, num_consts
-  return ad.backward_pass(fun_jaxpr.jaxpr, fun_jaxpr.consts, args, cts)
+  return ad.backward_pass(fun_jaxpr.jaxpr, (), fun_jaxpr.consts, args, cts)
 ad.primitive_transposes[custom_jvp_call_jaxpr_p] = _custom_jvp_call_jaxpr_transpose
 
 
