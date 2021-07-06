@@ -31,7 +31,7 @@ from jax.experimental import optimizers
 from jax.experimental import stax
 from jax.experimental.stax import Dense, FanOut, Relu, Softplus
 from examples import datasets
-
+"""https://jaan.io/what-is-variational-autoencoder-vae-tutorial/ a good blog post to understand the concept"""
 
 def gaussian_kl(mu, sigmasq):
   """KL divergence from a diagonal Gaussian to the standard Gaussian."""
@@ -48,7 +48,8 @@ def bernoulli_logpdf(logits, x):
 def elbo(rng, params, images):
   """Monte Carlo estimate of the negative evidence lower bound."""
   enc_params, dec_params = params
-  mu_z, sigmasq_z = encode(enc_params, images)
+  mu_z, sigmasq_z = encode(enc_params, images) # mu_z and sigmasq_z both of shape (batch_size, 10)
+  # decoder is to sample the latent space with gaussian probablity density, of mean of mu, and variance of sigma square
   logits_x = decode(dec_params, gaussian_sample(rng, mu_z, sigmasq_z))
   return bernoulli_logpdf(logits_x, images) - gaussian_kl(mu_z, sigmasq_z)
 
@@ -70,8 +71,8 @@ def image_grid(nrow, ncol, imagevecs, imshape):
 encoder_init, encode = stax.serial(
     Dense(512), Relu,
     Dense(512), Relu,
-    FanOut(2),
-    stax.parallel(Dense(10), stax.serial(Dense(10), Softplus)),
+    FanOut(2), # FanOut has no param, it concatenate the previous layer into a list with n element (n=2), essentially it is mapping previous layer n times and make a new layer
+    stax.parallel(Dense(10), stax.serial(Dense(10), Softplus)), # stax.parallele is used on FanOut, the first dense is applied on the first half of the previous layer, representing the gaussian mean, the second half is representing the 2nd half of the previous layer, which represent sigma square
 )
 
 decoder_init, decode = stax.serial(
